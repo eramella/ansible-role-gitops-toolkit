@@ -4,7 +4,7 @@ clusters:
     network: localclusters
     volumes:
 {% if gtk_enable_corp_ca %}
-      "{{ gtk_corp_ca_path }}": "/etc/ssl/certs/corp.crt"
+      "{{ gtk_corp_ca_file }}": "/etc/ssl/certs/corp.crt"
 {% endif %}
     envs:
       http_proxy: "@all"
@@ -25,7 +25,7 @@ clusters:
     network: localclusters
     volumes:
 {% if gtk_enable_corp_ca %}
-      "{{ gtk_corp_ca_path }}": "/etc/ssl/certs/corp.crt"
+      "{{ gtk_corp_ca_file }}": "/etc/ssl/certs/corp.crt"
 {% endif %}
     envs:
       http_proxy: "@all"
@@ -46,7 +46,7 @@ clusters:
     network: localclusters
     volumes:
 {% if gtk_enable_corp_ca %}
-      "{{ gtk_corp_ca_path }}": "/etc/ssl/certs/corp.crt"
+      "{{ gtk_corp_ca_file }}": "/etc/ssl/certs/corp.crt"
 {% endif %}
     envs:
       http_proxy: "@all"
@@ -74,7 +74,7 @@ clusters:
         password: admin1234
     volumes:
 {% if gtk_enable_corp_ca %}
-      "{{ gtk_corp_ca_path }}": "/etc/ssl/certs/corp.crt"
+      "{{ gtk_corp_ca_file }}": "/etc/ssl/certs/corp.crt"
 {% endif %}
     envs:
       http_proxy: "@all"
