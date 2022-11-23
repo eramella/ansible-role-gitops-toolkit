@@ -1,2 +1,80 @@
 ---
 # tasks file for gitops-toolkit
+
+- name: resolve platform specific vars
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+      skip: true
+      paths:
+        - '{{ role_path }}/vars'
+- name: check for {{ gtk_install_dir }}
+  become: yes
+  stat:
+    path: '{{ gtk_install_dir }}'
+  changed_when: False
+  register: gtk_binary
+- when: not gtk_binary.stat.exists
+  block:
+    - name: download {{ gtk_url }}...
+      become: yes
+      become_user: root
+      get_url:
+        url: '{{ gtk_url }}'
+        dest: '{{ gtk_tmp_tgz }}'
+        checksum: '{{ gtk_checksum }}'
+        mode: 0644
+    - name: mkdir {{ gtk_install_dir }}
+      become: yes
+      become_user: root
+      file:
+        path: '{{ gtk_install_dir }}'
+        state: directory
+        mode: 0755
+    - name: unarchive {{ gtk_tmp_tgz }}
+      become: yes
+      become_user: root
+      unarchive:
+        remote_src: yes
+        src: '{{ gtk_tmp_tgz }}'
+        dest: '{{ gtk_install_dir }}'
+        creates: '{{ gtk_installed_exe }}'
+  always:
+    - name: rm {{ gtk_tmp_tgz }}
+      become: yes
+      become_user: root
+      file:
+        path: '{{ gtk_tmp_tgz }}'
+        state: absent
+- name: link {{ gtk_installed_link }} to {{ gtk_installed_exe }}
+  become: yes
+  become_user: root
+  file:
+    src: '{{ gtk_installed_exe }}'
+    dest: '{{ gtk_installed_link }}'
+    state: link
+
+# download/install corp certs
+- name: create required dirs
+  when: gtk_enable_corp_ca
+  file:
+    path: '{{ gtk_corp_ca_path }}'
+    state: directory
+    mode: 0755
+- name: download corporate ca
+  when: gtk_enable_corp_ca
+  ansible.builtin.get_url:
+    url: '{{ gtk_corp_ca_url }}'
+    dest: '{{ gtk_corp_ca_file }}'
+    mode: '0440'
+
+- name: configuring {{ ansible_env.HOME }}/.gitops-toolkit-clusters.yaml
+  become: true
+  become_user: root
+  template:
+    src: '{{ gtk_cluster_template_yaml }}'
+    dest: '{{ ansible_env.HOME }}/.gitops-toolkit-clusters.yaml'
+    mode: '{{ item.m | default("0644") }}'
