@@ -43,7 +43,7 @@
   file:
     path: '{{ _gtk_start_clusters.context_output_dir }}'
     state: directory
-    mode: 0755
+    mode: '755'
 - name: issuing {{ enabled_clusters | length }}  kube contexts into {{ _gtk_start_clusters.context_output_dir }}
   shell: k3d kubeconfig get {{ item }} > {{ _gtk_start_clusters.context_output_dir }}/k3d_{{ item }}_ctx
   loop: "{{ enabled_clusters }}"

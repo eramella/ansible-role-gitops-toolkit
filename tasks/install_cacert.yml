@@ -7,11 +7,11 @@
       file:
         path: '{{ gtk_corp_ca_path }}'
         state: directory
-        mode: 0755
+        mode: '755'
     - name: download corporate ca
       when: gtk_enable_corp_ca
       ansible.builtin.get_url:
         use_proxy: '{{ gtk_corp_ca_use_proxy }}'
         url: '{{ gtk_corp_ca_url }}'
         dest: '{{ gtk_corp_ca_file }}'
-        mode: '0440'
+        mode: '440'

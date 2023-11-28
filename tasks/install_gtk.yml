@@ -8,23 +8,20 @@
 - when: not gtk_binary.stat.exists
   block:
     - name: download {{ gtk_url }}...
-      become: true
-      become_user: root
+      become: '{{ false if is_wsl else true }}'
       get_url:
         url: '{{ gtk_url }}'
         dest: '{{ gtk_tmp_tgz }}'
         checksum: '{{ gtk_checksum }}'
-        mode: 0644
+        mode: "{{ '647' if is_wsl else '644' }}"
     - name: mkdir {{ gtk_install_dir }}
       become: true
-      become_user: root
       file:
         path: '{{ gtk_install_dir }}'
         state: directory
-        mode: 0755
+        mode: '755'
     - name: unarchive {{ gtk_tmp_tgz }}
       become: true
-      become_user: root
       unarchive:
         remote_src: true
         src: '{{ gtk_tmp_tgz }}'
@@ -39,7 +36,6 @@
         state: absent
 - name: link {{ gtk_installed_link }} to {{ gtk_installed_exe }}
   become: true
-  become_user: root
   file:
     src: '{{ gtk_installed_exe }}'
     dest: '{{ gtk_installed_link }}'
